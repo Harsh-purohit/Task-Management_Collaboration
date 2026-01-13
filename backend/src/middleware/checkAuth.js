@@ -36,11 +36,18 @@ const adminAuth = async (req, res, next) => {
 
 const userAuth = async (req, res, next) => {
   try {
-    const { token } = req.headers;
+    const auth = req.headers.authorization;
+    // console.log("Received Token:", auth);
+
+    if (!auth || !auth.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "Missing token" });
+    }
+    const token = auth.split(" ")[1];
     if (!token) {
       return res.status(401).json({ message: "Unauthorized access" });
     }
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // console.log("Decoded Token:", decoded);
 
     if (!decoded || !decoded.id) {
       return res.status(401).json({ message: "Unauthorized access" });
