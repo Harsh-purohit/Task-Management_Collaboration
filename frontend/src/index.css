@@ -3,3 +3,7 @@
 .text-primary {
   @apply bg-linear-to-r from-blue-500 to-green-500 bg-clip-text text-transparent;
 }
+
+.sidebar-hover {
+  @apply hover:rounded-4xl hover:bg-gray-200 border-gray-200 transition-all duration-200;
+}

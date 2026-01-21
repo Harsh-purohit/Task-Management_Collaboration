@@ -5,6 +5,8 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Auth from "./components/Auth";
 import { useSelector } from "react-redux";
+import PrivateRoute from "./routes/PrivateRoute";
+import Dashboard from "./pages/Dashboard";
 
 const App = () => {
   const mode = useSelector((state) => state.login.mode);
@@ -18,9 +20,16 @@ const App = () => {
 
       <Routes>
         <Route path="/" element={<Home />} />
-        {/* <Route path="/project" element={<Project />} />
-        <Route path="/tasks" element={<Tasks />} />
-        <Route path="/dashboard" element={<Dashboard />} /> */}
+        {/* <Route path="/project" element={<Project />} /> */}
+        {/* <Route path="/tasks" element={<Tasks />} /> */}
+        <Route
+          path="/dashboard"
+          element={
+            <PrivateRoute>
+              <Dashboard />
+            </PrivateRoute>
+          }
+        />
       </Routes>
 
       <Footer />

@@ -8,10 +8,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
 import { faKey } from "@fortawesome/free-solid-svg-icons";
 import assets from "../assets/cross_icon.svg";
+import { useNavigate } from "react-router-dom";
 
 const Auth = () => {
   const mode = useSelector((state) => state.login.mode);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -36,10 +38,11 @@ const Auth = () => {
       // console.log(data);
 
       if (data.token) {
-        dispatch(mode === "login" ? login(data.user) : register(data.user));
+        dispatch(mode === "login" ? login(data.user_or_admin) : register(data.user_or_admin));
         localStorage.setItem("token", data.token);
-        console.log(localStorage.getItem("token"));
+        // console.log(localStorage.getItem("token"));
         dispatch(hideLogin());
+        navigate("/dashboard");
       }
     } catch (error) {
       alert(error.response.data.message || "Something went wrong!");
