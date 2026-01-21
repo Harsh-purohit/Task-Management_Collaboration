@@ -54,7 +54,14 @@ const Navbar = () => {
           <button className="text-primary cursor-pointer">{userName}</button>
 
           <div className="absolute hidden group-hover:block top-0 right-0 z-10 text-black rounded pt-12">
-            <ul className="list-none m-2 p-2 shadow-xl rounded-lg text-sm bg-[#F9FAFB]">
+            <ul className="list-none m-2 p-4 shadow-xl rounded-lg text-sm bg-[#F9FAFB]">
+              <li
+                // onClick={() => dispatch(logout())}
+                className="py-2 px-5 flex items-center gap-2 cursor-pointer hover:text-white hover:bg-gradient-to-r from-blue-500 to-green-500  rounded-full text-center"
+              >
+                Update{" "}
+                <FontAwesomeIcon icon={faUser} style={{ color: "#63E6BE" }} />
+              </li>
               <li
                 onClick={() => dispatch(logout())}
                 className="py-2 px-5 cursor-pointer hover:text-white hover:bg-gradient-to-r from-blue-500 to-green-500  rounded-full text-center"
