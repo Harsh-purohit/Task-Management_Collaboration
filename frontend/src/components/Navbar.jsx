@@ -8,12 +8,14 @@ import Sidebar from "./Sidebar";
 import { useDispatch, useSelector } from "react-redux";
 import { showLogin, showRegister } from "../features/loginSlice";
 import { logout } from "../features/authSlice";
+import UpdateProfileModal from "./UpdateProfileModal";
 
 const Navbar = () => {
   const dispatch = useDispatch();
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const userName = useSelector((state) => state.auth.user?.name);
   const [sidebar, setSidebar] = useState(false);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
 
   // console.log(userName);
 
@@ -56,7 +58,7 @@ const Navbar = () => {
           <div className="absolute hidden group-hover:block top-0 right-0 z-10 text-black rounded pt-12">
             <ul className="list-none m-2 p-4 shadow-xl rounded-lg text-sm bg-[#F9FAFB]">
               <li
-                // onClick={() => dispatch(logout())}
+                onClick={() => setShowUpdateModal(true)}
                 className="py-2 px-5 flex items-center gap-2 cursor-pointer hover:text-white hover:bg-gradient-to-r from-blue-500 to-green-500  rounded-full text-center"
               >
                 Update{" "}
@@ -91,6 +93,9 @@ const Navbar = () => {
             Register
           </button>
         </div>
+      )}
+      {showUpdateModal && (
+        <UpdateProfileModal onClose={() => setShowUpdateModal(false)} />
       )}
     </div>
   );

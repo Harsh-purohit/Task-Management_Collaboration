@@ -34,12 +34,18 @@ const Auth = () => {
           ? { email, password }
           : { name, email, password, role };
 
-      const { data } = await axios.post(BACKEND_url + url, payload);
+      const { data } = await axios.post(BACKEND_url + url, payload, {
+        withCredentials: true,
+      });
       // console.log(data);
 
       if (data.token) {
-        dispatch(mode === "login" ? login(data.user_or_admin) : register(data.user_or_admin));
-        localStorage.setItem("token", data.token);
+        dispatch(
+          mode === "login"
+            ? login(data.user_or_admin)
+            : register(data.user_or_admin),
+        );
+        // localStorage.setItem("token", data.token);
         // console.log(localStorage.getItem("token"));
         dispatch(hideLogin());
         navigate("/dashboard");
@@ -120,7 +126,7 @@ const Auth = () => {
             required
           />
         </div>
-        <button className="bg-gradient-to-r from-blue-500 to-green-500 rounded-full mt-5 w-full text-white px-4 py-2">
+        <button className="bg-gradient-to-r from-blue-500 to-green-500 rounded-full hover:scale-105 transition-transform cursor-pointer mt-5 w-full text-white px-4 py-2">
           {mode === "login" ? "Login" : "Register"}
         </button>
 
@@ -128,7 +134,7 @@ const Auth = () => {
           <p className="mt-5 text-center">
             Already have an account?{" "}
             <span
-              className="text-blue-600 cursor-pointer"
+              className="text-blue-600 cursor-pointer hover:text-blue-800"
               onClick={() => dispatch(showLogin())}
             >
               Login

@@ -39,11 +39,11 @@ const ProjectModal = ({ onClose, project }) => {
     e.preventDefault();
 
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("Please login again");
-        return;
-      }
+      // const token = localStorage.getItem("token");
+      // if (!token) {
+      //   alert("Please login again");
+      //   return;
+      // }
 
       // console.log("Sending project:", {
       //   name,
@@ -69,18 +69,14 @@ const ProjectModal = ({ onClose, project }) => {
           `${url}/api/projects/${project._id}`,
           payload,
           {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            withCredentials: true,
           },
         );
 
         dispatch(updateProject(response.data));
       } else {
         response = await axios.post(url + "/api/projects", payload, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          withCredentials: true,
         });
 
         dispatch(addProject(response.data));
@@ -92,6 +88,7 @@ const ProjectModal = ({ onClose, project }) => {
       console.log("STATUS:", error.response?.status);
       console.log("ERROR:", error.response?.data);
       alert(error.response?.data?.message || "Bad request");
+      onClose();
     }
   };
 
@@ -147,12 +144,12 @@ const ProjectModal = ({ onClose, project }) => {
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 bg-gray-200 rounded-md"
+            className="px-4 py-2 bg-gray-200 rounded-md cursor-pointer hover:scale-105 transition-transform"
           >
             Cancel
           </button>
 
-          <button className="bg-gradient-to-r from-blue-500 to-green-500 text-white px-4 py-2 rounded-md">
+          <button className="bg-gradient-to-r from-blue-500 to-green-500 text-white cursor-pointer hover:scale-105 transition-transform px-4 py-2 rounded-md">
             {isEdit ? "Update" : "Create"}
           </button>
         </div>

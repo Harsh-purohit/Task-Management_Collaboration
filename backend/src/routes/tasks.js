@@ -1,6 +1,6 @@
 import express from "express";
 import mongoose from "mongoose";
-import { adminAuth, bothAuth, userAuth } from "../middleware/checkAuth.js";
+import { adminAuth, bothAuth } from "../middleware/checkAuth.js";
 import Tasks from "../models/Tasks.js";
 import sendEmail from "../utils/sendEmail.js";
 import User from "../models/User.js";
@@ -108,7 +108,7 @@ router.get("/:id", bothAuth, async (req, res) => {
     const { id } = req.params;
     const filter = {};
 
-    console.log("QUERY PARAMS 👉", req.query);
+    // console.log("QUERY PARAMS 👉", req.query);
 
     if (id) {
       filter.projectRef = new mongoose.Types.ObjectId(id);

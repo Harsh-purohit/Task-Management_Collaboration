@@ -1,12 +1,13 @@
 import express from "express";
 import { adminAuth, userAuth, bothAuth } from "../middleware/checkAuth.js";
 import Projects from "../models/Projects.js";
+import Tasks from "../models/Tasks.js";
 
 const router = express.Router();
 
 router.post("/", adminAuth, async (req, res) => {
   try {
-    console.log(req.body);
+    // console.log(req.body);
     const { name, description, status, userRef } = req.body;
     const adminRef = req.userId;
 
@@ -52,7 +53,7 @@ router.put("/:id", adminAuth, async (req, res) => {
       { name, description, status },
       {
         new: true,
-      }
+      },
     );
     if (!projects) {
       return res.status(404).json({ message: "Project not found" });
@@ -68,7 +69,10 @@ router.put("/:id", adminAuth, async (req, res) => {
 router.delete("/:id", adminAuth, async (req, res) => {
   try {
     const { id } = req.params;
+    const tasks = await Tasks.deleteMany({ projectRef: id });
+    // console.log(tasks);
     const projects = await Projects.findByIdAndDelete(id);
+    // console.log(projects);
     if (!projects) {
       return res.status(404).json({ message: "Project not found" });
     }

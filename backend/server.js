@@ -7,12 +7,14 @@ import allusersRoutes from "./src/routes/admin.js";
 import projectRoutes from "./src/routes/projects.js";
 import taskRoutes from "./src/routes/tasks.js";
 import userRoutes from "./src/routes/user.js";
+import cookieParser from "cookie-parser";
 dotenv.config();
 
 const app = express();
 
-app.use(cors());
+app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 app.use(express.json());
+app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", allusersRoutes);

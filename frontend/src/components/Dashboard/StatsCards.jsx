@@ -10,22 +10,22 @@ const StatsCards = () => {
   const userInfo = useSelector((state) => state.userInfo.userInfo);
 
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-  const token = localStorage.getItem("token");
+  // const token = localStorage.getItem("token");
 
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        if (!token) {
-          alert("Please login again");
-          return;
-        }
+        // if (!token) {
+        //   alert("Please login again");
+        //   return;
+        // }
         const [tasksRes, projectsRes] = await Promise.all([
           axios.get(`${BACKEND_URL}/api/tasks`, {
-            headers: { Authorization: `Bearer ${token}` },
+            withCredentials: true,
             params: { users: userId },
           }),
           axios.get(`${BACKEND_URL}/api/projects`, {
-            headers: { Authorization: `Bearer ${token}` },
+            withCredentials: true,
             params: { users: userId },
           }),
         ]);
@@ -52,7 +52,7 @@ const StatsCards = () => {
     return () => {
       dispatch(clearUserInfo());
     };
-  }, [dispatch, BACKEND_URL, token]);
+  }, [dispatch, BACKEND_URL]);
 
   const totalTasks = userInfo?.tasks?.length || 0;
   const completedTasks =

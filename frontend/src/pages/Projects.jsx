@@ -17,23 +17,21 @@ const Projects = () => {
 
   const deleteProject = async (id) => {
     try {
-      const token = localStorage.getItem("token");
+      // const token = localStorage.getItem("token");
 
-      if (!token) {
-        alert("Please login again");
-        return;
-      }
+      // if (!token) {
+      //   alert("Please login again");
+      //   return;
+      // }
+      const confirmDelete = window.confirm("Delete this project?");
+      if (!confirmDelete) return;
 
       const response = await axios.delete(`${url}/api/projects/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        withCredentials: true,
       });
 
-      console.log(response.data);
-      if (response.data.success) {
-        dispatch(removeProject(id));
-      }
+      // console.log(response);
+      dispatch(removeProject(id));
     } catch (error) {
       console.log(error);
       alert(error.response?.data?.message || "Something went wrong");

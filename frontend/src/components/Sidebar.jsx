@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import project from "../assets/project.png";
-import tasks from "../assets/tasks.png";
+// import tasks from "../assets/tasks.png";
 import help from "../assets/help.png";
 import dashboard from "../assets/dashboard.png";
 

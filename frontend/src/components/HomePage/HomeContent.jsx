@@ -1,6 +1,12 @@
 import React from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { showLogin } from "../../features/loginSlice";
 
 const HomeContent = () => {
+  const dispatch = useDispatch();
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+
+  // console.log("isAuthenticated", isAuthenticated);
   return (
     <div className="flex flex-col justify-center items-center">
       <div className="mt-25">
@@ -14,7 +20,12 @@ const HomeContent = () => {
       </div>
 
       <div className="flex items-center justify-between gap-5 py-5">
-        <button className="bg-gradient-to-r from-blue-500 to-green-500 rounded-full w-full text-white px-6 py-2 cursor-pointer">
+        <button
+          onClick={() => {
+            !isAuthenticated && dispatch(showLogin());
+          }}
+          className="bg-gradient-to-r from-blue-500 to-green-500 rounded-full w-full text-white px-6 py-2 cursor-pointer"
+        >
           Get Started
         </button>
         <button className="bg-gradient-to-r from-blue-500 to-green-500 rounded-full  w-full text-white px-6 py-2 cursor-pointer">

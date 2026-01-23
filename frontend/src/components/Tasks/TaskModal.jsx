@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
-import { addTask } from "../../features/taskSlice";
+import { addTask, updateTask } from "../../features/taskSlice";
 import useAllUsers from "../hooks/Alluser";
+import { toast } from "react-hot-toast";
 
-const TaskModal = ({ projectId, onClose }) => {
+const TaskModal = ({ projectId, task, onClose }) => {
   const dispatch = useDispatch();
 
   const [title, setTitle] = useState("");
@@ -13,6 +14,8 @@ const TaskModal = ({ projectId, onClose }) => {
   const [status, setStatus] = useState("Todo");
   const [endDate, setEndDate] = useState("");
   const [users, setUsers] = useState([]);
+
+  const isEdit = !!task;
 
   const allusers = useSelector((state) => state.allusers.allusers || []);
 
@@ -24,37 +27,82 @@ const TaskModal = ({ projectId, onClose }) => {
     fetchAllUsers();
   }, []);
 
+  useEffect(() => {
+    if (task) {
+      setTitle(task.title || "");
+      setDescription(task.description || "");
+      setPriority(task.priority || "Low");
+      setStatus(task.status || "Todo");
+      setEndDate(task.endDate?.slice(0, 10) || "");
+      setUsers(task.users || []);
+    }
+  }, [task]);
+
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-  const token = localStorage.getItem("token");
+  // const token = localStorage.getItem("token");
+
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+
+    try {
+      const { data } = await axios.put(
+        `${BACKEND_URL}/api/tasks/${task._id}`,
+        {
+          title,
+          description,
+          priority,
+          users,
+          status,
+          endDate,
+        },
+        { withCredentials: true },
+      );
+
+      dispatch(updateTask(data));
+      alert("Updated successfully");
+      onClose();
+    } catch (err) {
+      alert(err.response?.data?.message);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const { data } = await axios.post(
-      `${BACKEND_URL}/api/tasks`,
-      {
-        title,
-        users,
-        endDate,
-        priority,
-        description,
-        projectRef: projectId,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
+    try {
+      const { data } = await axios.post(
+        `${BACKEND_URL}/api/tasks`,
+        {
+          title,
+          users,
+          endDate,
+          priority,
+          description,
+          projectRef: projectId,
         },
-      },
-    );
+        {
+          withCredentials: true,
+        },
+      );
 
-    dispatch(addTask(data));
-    onClose();
+      dispatch(addTask(data));
+      onClose();
+    } catch (error) {
+      // alert(error.response?.data?.message || "Bad request");
+      toast.error(error);
+      onClose();
+    }
   };
 
   return (
     <div className="fixed inset-0 z-50 flex justify-center items-center bg-black/30 backdrop-blur-sm">
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded-xl w-100">
-        <h2 className="mb-4 font-semibold">Add Task</h2>
+      <form
+        onSubmit={isEdit ? handleUpdate : handleSubmit}
+        className="bg-white p-6 rounded-xl w-100"
+      >
+        <h2 className="mb-4 font-semibold">
+          {isEdit ? "Edit Task" : "Add Task"}
+        </h2>
 
         <input
           value={title}
@@ -124,8 +172,11 @@ const TaskModal = ({ projectId, onClose }) => {
             Cancel
           </button>
 
-          <button className="bg-gradient-to-r from-blue-500 to-green-500 text-white cursor-pointer px-4 py-2 rounded-md shadow-2xl">
-            Create
+          <button
+            type="submit"
+            className="bg-gradient-to-r from-blue-500 to-green-500 text-white cursor-pointer px-4 py-2 rounded-md shadow-2xl"
+          >
+            {isEdit ? "Update" : "Create"}
           </button>
         </div>
       </form>

@@ -8,15 +8,13 @@ const useAllUsers = () => {
 
   const fetchAllUsers = async () => {
     try {
-      if (!localStorage.getItem("token")) {
-        alert("Please login again");
-        return;
-      }
+      // if (!localStorage.getItem("token")) {
+      //   alert("Please login again");
+      //   return;
+      // }
 
       const response = await axios.get(`${url}/api/admin/allusers`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        withCredentials: true,
       });
 
       //   console.log("all users", response.data.users);

@@ -5,7 +5,7 @@ import {
   faUsers,
   faLock,
 } from "@fortawesome/free-solid-svg-icons";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { showRegister } from "../../features/loginSlice";
 
 const reasons = [
@@ -37,6 +37,7 @@ const reasons = [
 
 const WhyChoose = () => {
   const dispatch = useDispatch();
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
 
   return (
     <section className="py-20 px-4 bg-[#F9FAFB]">
@@ -85,8 +86,10 @@ const WhyChoose = () => {
           </p>
 
           <button
-            onClick={() => dispatch(showRegister())}
-            className="bg-gradient-to-r from-blue-500 to-green-500 text-white px-8 py-3 rounded-full font-medium hover:opacity-90 transition"
+            onClick={() => {
+              !isAuthenticated && dispatch(showRegister());
+            }}
+            className="bg-gradient-to-r from-blue-500 to-green-500 text-white cursor-pointer px-8 py-3 rounded-full font-medium hover:opacity-90 transition"
           >
             Create your free account
           </button>
