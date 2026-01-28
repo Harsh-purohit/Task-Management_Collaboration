@@ -18,10 +18,10 @@ const useAllUsers = () => {
         withCredentials: true,
       });
 
-      console.log("all users", response.data.users);
+      // console.log("all users", response.data);
 
       if (response.status === 200) {
-        dispatch(setAllusers(response.data.users));
+        dispatch(setAllusers(response.data));
       }
     } catch (error) {
       notify.error(error.response?.data?.message || "Something went wrong!");

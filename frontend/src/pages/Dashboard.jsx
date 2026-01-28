@@ -1,10 +1,18 @@
 import StatsCards from "../components/Dashboard/StatsCards";
 import TodayTasks from "../components/Dashboard/TodayTasks";
 import { useSelector } from "react-redux";
+import { useEffect } from "react";
+import useAllUsers from "../hooks/Alluser";
 // import RecentActivity from "../components/dashboard/RecentActivity";
 
 const Dashboard = () => {
   const userName = useSelector((state) => state.auth.user?.name);
+
+  const { fetchAllUsers } = useAllUsers();
+
+  useEffect(() => {
+    fetchAllUsers();
+  }, []);
 
   return (
     <div className="py-10 space-y-10 min-h-screen">

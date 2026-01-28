@@ -41,18 +41,19 @@ const Auth = () => {
       // console.log(data);
 
       if (data.token) {
-        dispatch(
-          mode === "login"
-            ? login(data.user_or_admin)
-            : register(data.user_or_admin),
-        );
-        // localStorage.setItem("token", data.token);
-        // console.log(localStorage.getItem("token"));
+        const action = mode === "login" ? login(data) : register(data);
+
+        dispatch(action);
+
         dispatch(hideLogin());
-        mode === "login"
-          ? notify.success("Welcome back!!")
-          : notify.success("Account created successfully!!");
-        navigate("/dashboard");
+
+        notify.success(
+          mode === "login"
+            ? "Welcome back!!"
+            : "Account created successfully!!",
+        );
+
+        setTimeout(() => navigate("/dashboard"), 500);
       }
     } catch (error) {
       notify.error(error.response.data.message || "Something went wrong!");

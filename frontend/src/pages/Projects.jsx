@@ -16,6 +16,9 @@ const Projects = () => {
   const projects = useSelector((state) => state.projects.projects);
   const navigate = useNavigate();
 
+  const user = useSelector((state) => state.auth);
+  // console.log("-----", user);
+
   // console.log("proj: ", projects);
 
   const [showModal, setShowModal] = useState(false);
@@ -71,12 +74,14 @@ const Projects = () => {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-semibold">Projects</h1>
 
-        <button
-          onClick={() => setShowModal(true)}
-          className="bg-gradient-to-r from-blue-500 to-green-500 text-white px-4 py-2 rounded-full hover:scale-105 transition-transform cursor-pointer"
-        >
-          + Create Project
-        </button>
+        {user.isAdmin && (
+          <button
+            onClick={() => setShowModal(true)}
+            className="bg-gradient-to-r from-blue-500 to-green-500 text-white px-4 py-2 rounded-full hover:scale-105 transition-transform cursor-pointer"
+          >
+            + Create Project
+          </button>
+        )}
       </div>
 
       {projects.length === 0 ? (
@@ -135,6 +140,15 @@ const Projects = () => {
                 {project.description || "No description"}
               </p>
 
+              {/* <p className="text-xs text-gray-500 mt-2">
+                Assigned to:{" "}
+                {project.userRef?.length
+                  ? project.assignedTo
+                      .map((u) => u.name || getUserName(u))
+                      .join(", ")
+                  : "Unassigned"}
+              </p> */}
+
               {/* STATUS */}
               <select
                 value={project.status}
@@ -155,29 +169,31 @@ const Projects = () => {
                 <option>Completed</option>
               </select>
 
-              <div className="flex gap-4 mt-4 text-sm">
-                <button
-                  onClick={() => setSelectedProject(project)}
-                  className="text-blue-600 hover:underline cursor-pointer"
-                >
-                  <FontAwesomeIcon
-                    icon={faPenToSquare}
-                    // style={{ color: "#0000ff" }}
-                    size="lg"
-                  />
-                </button>
+              {user.isAdmin && (
+                <div className="flex gap-4 mt-4 text-sm">
+                  <button
+                    onClick={() => setSelectedProject(project)}
+                    className="text-blue-600 hover:underline cursor-pointer"
+                  >
+                    <FontAwesomeIcon
+                      icon={faPenToSquare}
+                      // style={{ color: "#0000ff" }}
+                      size="lg"
+                    />
+                  </button>
 
-                <button
-                  onClick={deleteProject.bind(null, project._id)}
-                  className="text-red-500 hover:underline cursor-pointer"
-                >
-                  <FontAwesomeIcon
-                    icon={faTrashCan}
-                    // style={{ color: "#ff0000" }}
-                    size="lg"
-                  />
-                </button>
-              </div>
+                  <button
+                    onClick={deleteProject.bind(null, project._id)}
+                    className="text-red-500 hover:underline cursor-pointer"
+                  >
+                    <FontAwesomeIcon
+                      icon={faTrashCan}
+                      // style={{ color: "#ff0000" }}
+                      size="lg"
+                    />
+                  </button>
+                </div>
+              )}
             </div>
           ))}
         </div>

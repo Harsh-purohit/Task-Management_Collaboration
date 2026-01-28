@@ -9,15 +9,9 @@ import { notify } from "../../utils/toast";
 const ProjectModal = ({ onClose, project }) => {
   const dispatch = useDispatch();
   const isEdit = !!project;
-  const allusers = useSelector((state) => state.allusers.allusers || []);
+  const allusers = useSelector((state) => state.allusers.allusers.users || []);
 
-  // console.log("allusers", allusers);
-
-  const { fetchAllUsers } = useAllUsers();
-
-  useEffect(() => {
-    fetchAllUsers();
-  }, []);
+  console.log("allusers", allusers);
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");

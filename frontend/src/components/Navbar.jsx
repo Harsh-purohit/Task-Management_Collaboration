@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { showLogin, showRegister } from "../features/loginSlice";
 import { logout } from "../features/authSlice";
 import UpdateProfileModal from "./UpdateProfileModal";
+import { notify } from "../utils/toast";
 
 const Navbar = () => {
   const dispatch = useDispatch();
@@ -18,6 +19,11 @@ const Navbar = () => {
   const [showUpdateModal, setShowUpdateModal] = useState(false);
 
   // console.log(userName);
+
+  const handleLogout = () => {
+    dispatch(logout());
+    notify.success("Logout Successfull.");
+  };
 
   return (
     <div className="flex justify-between items-center py-4">
@@ -65,7 +71,7 @@ const Navbar = () => {
                 <FontAwesomeIcon icon={faUser} style={{ color: "#63E6BE" }} />
               </li>
               <li
-                onClick={() => dispatch(logout())}
+                onClick={handleLogout}
                 className="py-2 px-5 cursor-pointer hover:text-white hover:bg-gradient-to-r from-blue-500 to-green-500  rounded-full text-center"
               >
                 Logout

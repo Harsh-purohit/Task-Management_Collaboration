@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -19,12 +19,16 @@ dayjs.extend(relativeTime);
 
 const ProjectDetails = () => {
   const { id } = useParams();
+  // console.log("id: ", id);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const users = useSelector((state) => state.allusers.allusers || []);
   const tasks = useSelector((state) => state.tasks.tasks);
 
   // console.log("task: ", tasks);
+
+  const user = useSelector((state) => state.auth);
 
   const [openComments, setOpenComments] = useState(null);
   const [newComment, setNewComment] = useState("");
@@ -36,7 +40,10 @@ const ProjectDetails = () => {
   // console.log("users:   ", users);
   const getUserName = (id) => {
     // console.log(id);
-    const user = users.find((u) => u._id === id);
+    let user = users.users.find((u) => u._id === id);
+    if (!user) {
+      user = users.admin.find((u) => u._id === id);
+    }
 
     // console.log("-------", user);
     return user ? user.name : "Unknown";
@@ -98,6 +105,18 @@ const ProjectDetails = () => {
     }
   };
 
+  useEffect(() => {
+    // console.log(tasks.length);
+    if (tasks.length === 0) {
+      notify.dismiss();
+      notify.success("No tasks yet 🚀");
+
+      const timer = setTimeout(() => navigate("/projects"), 1000);
+
+      return () => clearTimeout(timer);
+    } 
+  }, [tasks.length]);
+
   // -----------------------------
   // Fetch
   // -----------------------------
@@ -120,22 +139,22 @@ const ProjectDetails = () => {
     <div className="py-10 space-y-8 min-h-screen">
       {/* Header */}{" "}
       <div className="flex justify-between items-center">
-        {" "}
         <h1 className="text-2xl font-semibold">Project Tasks</h1>{" "}
-        <button
-          onClick={() => {
-            (setShowModal(true), setSelectedTask(null));
-          }}
-          className="bg-gradient-to-r from-blue-500 to-green-500 text-white px-4 py-2 rounded-full hover:scale-105 transition-transform cursor-pointer"
-        >
-          {" "}
-          + Add Task{" "}
-        </button>{" "}
+        {user.isAdmin && (
+          <button
+            onClick={() => {
+              (setShowModal(true), setSelectedTask(null));
+            }}
+            className="bg-gradient-to-r from-blue-500 to-green-500 text-white px-4 py-2 rounded-full hover:scale-105 transition-transform cursor-pointer"
+          >
+            + Add Task
+          </button>
+        )}
       </div>
       {tasks.length === 0 ? (
         <div className="text-gray-500 text-center py-20">No tasks yet 🚀</div>
       ) : (
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-3 gap-6 items-center">
           {tasks.map((task) => (
             <div
               key={task._id}
@@ -149,37 +168,39 @@ const ProjectDetails = () => {
 
                 {/* <h3>Assigned to: {task.users}</h3> */}
 
-                <div className="flex items-center justify-between gap-3">
-                  <button
-                    className="text-blue-400 hover:text-blue-600 text-sm cursor-pointer"
-                    onClick={() => {
-                      (setShowModal(true), setSelectedTask(task));
-                    }}
-                  >
-                    <FontAwesomeIcon
-                      icon={faPenToSquare}
-                      // style={{ color: "#0000ff" }}
-                      size="lg"
-                    />
-                  </button>
+                {user.isAdmin && (
+                  <div className="flex items-center justify-between gap-3">
+                    <button
+                      className="text-blue-400 hover:text-blue-600 text-sm cursor-pointer"
+                      onClick={() => {
+                        (setShowModal(true), setSelectedTask(task));
+                      }}
+                    >
+                      <FontAwesomeIcon
+                        icon={faPenToSquare}
+                        // style={{ color: "#0000ff" }}
+                        size="lg"
+                      />
+                    </button>
 
-                  <button
-                    onClick={() => handleDelete(task._id)}
-                    className="text-red-400 hover:text-red-500 text-sm cursor-pointer"
-                  >
-                    {/* <FontAwesomeIcon
+                    <button
+                      onClick={() => handleDelete(task._id)}
+                      className="text-red-400 hover:text-red-500 text-sm cursor-pointer"
+                    >
+                      {/* <FontAwesomeIcon
                     icon={faClockRotateLeft}
                     size="lg"
                     style={{ color: "#63E6BE" }}
                   /> */}
 
-                    <FontAwesomeIcon
-                      icon={faTrashCan}
-                      // style={{ color: "#ff0000" }}
-                      size="lg"
-                    />
-                  </button>
-                </div>
+                      <FontAwesomeIcon
+                        icon={faTrashCan}
+                        // style={{ color: "#ff0000" }}
+                        size="lg"
+                      />
+                    </button>
+                  </div>
+                )}
               </div>
 
               <p className="text-gray-500 text-[16px] mt-1 line-clamp-2">
@@ -281,7 +302,7 @@ const ProjectDetails = () => {
                       >
                         <div className="flex justify-between items-center text-gray-500 mb-1">
                           <span className="font-semibold">
-                            {c.userRef?.name}
+                            {c.userRef?.name || getUserName(c.userRef)}
                           </span>
 
                           <span

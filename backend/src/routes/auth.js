@@ -69,6 +69,7 @@ router.post("/register", async (req, res) => {
       res.json({
         token,
         admin,
+        role,
       });
     }
 
@@ -129,6 +130,7 @@ router.post("/register", async (req, res) => {
     res.json({
       token,
       user,
+      role,
     });
   } catch (err) {
     console.log(err);
@@ -144,10 +146,16 @@ router.post("/login", async (req, res) => {
     if (!email || !password)
       return res.status(400).json({ message: "email & password required" });
 
-    const user_or_admin =
-      (await User.findOne({ email, isDeleted: false })) ||
-      (await Admin.findOne({ email }));
+    let role;
+    let user_or_admin = await User.findOne({ email, isDeleted: false });
+    if (user_or_admin) role = "user";
+
+    if (!user_or_admin) {
+      user_or_admin = await Admin.findOne({ email });
+      role = "admin";
+    }
     // console.log(user_or_admin);
+    // console.log(role);
 
     if (!user_or_admin)
       return res.status(400).json({ message: "Invalid credentials" });
@@ -169,6 +177,7 @@ router.post("/login", async (req, res) => {
     res.json({
       token,
       user_or_admin,
+      role,
     });
   } catch (err) {
     console.error(err);

@@ -5,7 +5,6 @@ import Tasks from "../models/Tasks.js";
 import { logActivity } from "../utils/logActivity.js";
 import mongoose from "mongoose";
 
-
 const router = express.Router();
 
 router.post("/", adminAuth, async (req, res) => {
@@ -47,23 +46,37 @@ router.post("/", adminAuth, async (req, res) => {
 
 router.get("/", bothAuth, async (req, res) => {
   try {
-    console.log("User ID:", req.userId);
-
-    const projects =
-      req.role === "admin"
-        ? await Projects.find({})
-        : await Projects.find({ userRef: req.userId });
-
-    if (projects.length === 0 && req.role !== "admin") {
-      const userProj = await Tasks.find({ assignedTo: req.userId });
-      console.log(userProj);
-      return res.status(200).json(userProj);
+    if (req.role === "admin") {
+      const projects = await Projects.find({});
+      return res.status(200).json(projects);
     }
-    console.log("Fetched Projects:", projects);
-    return res.status(200).json(projects);
+
+    // projects created by user
+    const ownedProjects = await Projects.find({ userRef: req.userId });
+
+    // tasks assigned to user
+    const tasks = await Tasks.find({ assignedTo: req.userId });
+
+    // extract project ids
+    const projectIds = tasks.map((t) => t.projectRef);
+
+    // projects where user has tasks
+    const taskProjects = await Projects.find({
+      _id: { $in: projectIds },
+    });
+
+    // merge unique
+    const allProjects = [
+      ...ownedProjects,
+      ...taskProjects.filter(
+        (tp) => !ownedProjects.some((op) => op._id.equals(tp._id)),
+      ),
+    ];
+
+    return res.status(200).json(allProjects);
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Server error" });
   }
 });
 
@@ -124,9 +137,7 @@ router.put("/:id", adminAuth, async (req, res) => {
         action: "project-updated",
         entity: "project",
         entityId: projects._id,
-        message: `Updated project "${projects.name}" (${changes.join(
-          ", ",
-        )})`,
+        message: `Updated project "${projects.name}" (${changes.join(", ")})`,
         metadata,
       });
     }

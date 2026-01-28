@@ -116,39 +116,32 @@ router.get("/:id", bothAuth, async (req, res) => {
   try {
     const { users, status, priority } = req.query;
     const { id } = req.params;
-    const filter = {};
 
-    // console.log("QUERY PARAMS 👉", req.query);
+    const filter = {
+      projectRef: new mongoose.Types.ObjectId(id),
+    };
 
-    if (id) {
-      req.role === "admin"
-        ? (filter.projectRef = new mongoose.Types.ObjectId(id))
-        : (filter._id = new mongoose.Types.ObjectId(id));
-    }
-
-    if (users) {
-      const userArray = Array.isArray(users) ? users : [users];
-      filter.assignedTo = {
-        $in: userArray.map((id) => new mongoose.Types.ObjectId(id)),
-      };
-    }
+    // 👇 user restriction (strongest rule)
     if (req.role === "user") {
+      filter.assignedTo = new mongoose.Types.ObjectId(req.userId);
+    }
+
+    // 👇 admin custom filter
+    else if (users) {
+      const userArray = Array.isArray(users) ? users : [users];
+
       filter.assignedTo = {
-        $in: [new mongoose.Types.ObjectId(req.userId)],
+        $in: userArray.map((uid) => new mongoose.Types.ObjectId(uid)),
       };
     }
 
-    if (status) {
-      filter.status = status;
-    }
+    if (status) filter.status = status;
+    if (priority) filter.priority = priority;
 
-    if (priority) {
-      filter.priority = priority;
-    }
+    const tasks = await Tasks.find(filter);
 
-    const tasks = await Tasks.find(filter).sort({ createdAt: -1 });
     // console.log("FILTER USED 👉", filter);
-    // console.log("TASKS 👉", tasks);
+
     res.status(200).json(tasks);
   } catch (err) {
     console.error(err);

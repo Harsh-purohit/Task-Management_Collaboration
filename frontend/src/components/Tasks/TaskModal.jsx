@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { addTask, updateTask } from "../../features/taskSlice";
 import useAllUsers from "../../hooks/Alluser";
-import { toast } from "react-hot-toast";
 import { notify } from "../../utils/toast";
 
 const TaskModal = ({ projectId, task, onClose }) => {
@@ -163,8 +162,6 @@ const TaskModal = ({ projectId, task, onClose }) => {
             })}
           </div>
         </div>
-
-        
 
         {/* DATE */}
         <div>

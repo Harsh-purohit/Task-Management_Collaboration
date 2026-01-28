@@ -10,7 +10,7 @@ const userInfoSlice = createSlice({
   reducers: {
     setAllusers: (state, action) => {
       state.allusers = action.payload;
-      console.log("from slice", state.allusers);
+      // console.log("from slice", state.allusers);
     },
   },
 });

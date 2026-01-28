@@ -1,17 +1,19 @@
 import express from "express";
-import { adminAuth } from "../middleware/checkAuth.js";
+import { adminAuth, bothAuth } from "../middleware/checkAuth.js";
 import User from "../models/User.js";
 import mongoose from "mongoose";
+import Admin from "../models/Admin.js";
 
 const router = express.Router();
 
-router.get("/allusers", adminAuth, async (req, res) => {
+router.get("/allusers", bothAuth, async (req, res) => {
   try {
-    const result = await User.find({isDeleted: false});
+    const resultUsers = await User.find({ isDeleted: false });
+    const resultAdmin = await Admin.find();
 
-    // console.log("Fetched Users:", result);
+    // console.log("Fetched Users:", resultUsers);
 
-    res.status(200).json({ users: result });
+    res.status(200).json({ users: resultUsers, admin: resultAdmin });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Internal server error" });
@@ -30,7 +32,7 @@ router.delete("/deleteuser/:id", adminAuth, async (req, res) => {
     const user = await User.findByIdAndUpdate(
       userId,
       { isDeleted: true },
-      { new: true }
+      { new: true },
     );
 
     if (!user) {
