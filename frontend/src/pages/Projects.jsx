@@ -132,7 +132,7 @@ const Projects = () => {
                       activeLogProject === project._id ? null : project._id,
                     )
                   }
-                  className="cursor-pointer"
+                  className="cursor-pointer "
                 >
                   <FontAwesomeIcon
                     icon={faClockRotateLeft}
