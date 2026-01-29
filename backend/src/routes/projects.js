@@ -4,6 +4,7 @@ import Projects from "../models/Projects.js";
 import Tasks from "../models/Tasks.js";
 import { logActivity } from "../utils/logActivity.js";
 import mongoose from "mongoose";
+import client from "../config/redisClient.js";
 
 const router = express.Router();
 
@@ -46,8 +47,18 @@ router.post("/", adminAuth, async (req, res) => {
 
 router.get("/", bothAuth, async (req, res) => {
   try {
+    const cacheKey = `projects:${req.userId}`;
+
+    const cachedData = await client.get(cacheKey);
+    // console.log(cachedData);
+    if (cachedData) {
+      return res.status(200).json(JSON.parse(cachedData));
+    }
+
     if (req.role === "admin") {
       const projects = await Projects.find({});
+
+      await client.set(cacheKey, JSON.stringify(projects), { EX: 180 });
       return res.status(200).json(projects);
     }
 
@@ -72,6 +83,8 @@ router.get("/", bothAuth, async (req, res) => {
         (tp) => !ownedProjects.some((op) => op._id.equals(tp._id)),
       ),
     ];
+
+    await client.set(cacheKey, JSON.stringify(allProjects), { EX: 180 });
 
     return res.status(200).json(allProjects);
   } catch (err) {

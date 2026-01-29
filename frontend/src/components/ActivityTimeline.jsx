@@ -34,6 +34,7 @@ const ActivityTimeline = ({ id }) => {
         const { data } = await axios.get(`${BACKEND_URL}/api/activity/${id}`, {
           withCredentials: true,
         });
+        // console.log("activity logs: ", data);
         setLogs(data);
       } finally {
         setLoading(false);

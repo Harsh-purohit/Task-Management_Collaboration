@@ -5,6 +5,7 @@ import Tasks from "../models/Tasks.js";
 import sendEmail from "../utils/sendEmail.js";
 import User from "../models/User.js";
 import { logActivity } from "../utils/logActivity.js";
+import client from "../config/redisClient.js";
 
 const router = express.Router();
 
@@ -81,6 +82,14 @@ router.get("/", bothAuth, async (req, res) => {
     const { id, users, status, priority } = req.query;
     const filter = {};
 
+    const cacheKey = `tasks:${req.userId}`;
+
+    const cachedData = await client.get(cacheKey);
+    // console.log(cachedData);
+    if (cachedData) {
+      return res.status(200).json(JSON.parse(cachedData));
+    }
+
     // console.log("QUERY PARAMS 👉", req.query);
 
     if (id) {
@@ -103,6 +112,8 @@ router.get("/", bothAuth, async (req, res) => {
     }
 
     const tasks = await Tasks.find(filter);
+
+    await client.set(cacheKey, JSON.stringify(tasks), { EX: 180 });
     // console.log("FILTER USED 👉", filter);
     // console.log("TASKS 👉", tasks);
     res.status(200).json(tasks);
@@ -116,6 +127,14 @@ router.get("/:id", bothAuth, async (req, res) => {
   try {
     const { users, status, priority } = req.query;
     const { id } = req.params;
+
+    const cacheKey = `${req.userId}_tasks: ${id}`;
+
+    const cachedData = await client.get(cacheKey);
+    // console.log(cachedData);
+    if (cachedData) {
+      return res.status(200).json(JSON.parse(cachedData));
+    }
 
     const filter = {
       projectRef: new mongoose.Types.ObjectId(id),
@@ -141,6 +160,7 @@ router.get("/:id", bothAuth, async (req, res) => {
     const tasks = await Tasks.find(filter);
 
     // console.log("FILTER USED 👉", filter);
+    await client.set(cacheKey, JSON.stringify(tasks), { EX: 180 });
 
     res.status(200).json(tasks);
   } catch (err) {
