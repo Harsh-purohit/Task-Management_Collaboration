@@ -31,7 +31,7 @@ const Projects = () => {
   const getUserName = (id) => {
     // console.log(id);
     let user = users.users.find((u) => u._id === id);
-    
+
     if (!user) {
       user = users.admin.find((u) => u._id === id);
     }
@@ -82,7 +82,7 @@ const Projects = () => {
       notify.error(error.response?.data?.message || "Something went wrong");
     }
   };
-  
+
   return (
     <div className="py-10 space-y-8 min-h-screen">
       <div className="flex justify-between items-center">
@@ -160,12 +160,17 @@ const Projects = () => {
               </p>
 
               {/* STATUS */}
-              <select
-                value={project.status}
-                onChange={(e) =>
-                  updateField(project._id, "status", e.target.value)
-                }
-                className={`px-2 py-1 mt-3 rounded-full text-xs font-medium border cursor-pointer outline-none
+              <div className="flex items-center gap-1">
+                <p className="text-sm text-gray-500 mt-2 ">
+                  Status:
+                </p>
+                {user.isAdmin ? (
+                  <select
+                    value={project.status}
+                    onChange={(e) =>
+                      updateField(project._id, "status", e.target.value)
+                    }
+                    className={`px-2 py-1 mt-3 rounded-full text-xs font-medium border cursor-pointer outline-none
             ${
               project.status === "Todo"
                 ? "bg-gray-100 text-gray-600"
@@ -173,11 +178,26 @@ const Projects = () => {
                   ? "bg-yellow-100 text-yellow-700"
                   : "bg-green-100 text-green-700"
             }`}
-              >
-                <option>Todo</option>
-                <option>In Progress</option>
-                <option>Completed</option>
-              </select>
+                  >
+                    <option>Todo</option>
+                    <option>In Progress</option>
+                    <option>Completed</option>
+                  </select>
+                ) : (
+                  <p
+                    className={`px-2 py-1 w-20 mt-3 rounded-full text-xs font-medium border cursor-pointer outline-none
+            ${
+              project.status === "Todo"
+                ? "bg-gray-100 text-gray-600"
+                : project.status === "In Progress"
+                  ? "bg-yellow-100 text-yellow-700"
+                  : "bg-green-100 text-green-700"
+            }`}
+                  >
+                    {project.status}
+                  </p>
+                )}
+              </div>
 
               {user.isAdmin && (
                 <div className="flex gap-4 mt-4 text-sm">

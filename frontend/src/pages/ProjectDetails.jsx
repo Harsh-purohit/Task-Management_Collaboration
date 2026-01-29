@@ -232,13 +232,16 @@ const ProjectDetails = () => {
 
               {/* ---------------- Controls Row ---------------- */}
               <div className="flex gap-3 mt-4">
-                {/* STATUS */}
-                <select
-                  value={task.status}
-                  onChange={(e) =>
-                    updateField(task._id, "status", e.target.value)
-                  }
-                  className={`px-2 py-1 rounded-full text-xs font-medium border cursor-pointer outline-none
+                <div className="flex items-center gap-1">
+                  {/* STATUS */}
+                  <p className="text-sm text-gray-500">Status:</p>
+                  {user.isAdmin ? (
+                    <select
+                      value={task.status}
+                      onChange={(e) =>
+                        updateField(task._id, "status", e.target.value)
+                      }
+                      className={`px-2 py-1 rounded-full text-xs font-medium border cursor-pointer outline-none
             ${
               task.status === "Todo"
                 ? "bg-gray-100 text-gray-600"
@@ -246,19 +249,37 @@ const ProjectDetails = () => {
                   ? "bg-yellow-100 text-yellow-700"
                   : "bg-green-100 text-green-700"
             }`}
-                >
-                  <option>Todo</option>
-                  <option>In Progress</option>
-                  <option>Completed</option>
-                </select>
+                    >
+                      <option>Todo</option>
+                      <option>In Progress</option>
+                      <option>Completed</option>
+                    </select>
+                  ) : (
+                    <p
+                      className={`px-2 py-1 rounded-full text-xs font-medium border cursor-pointer outline-none
+            ${
+              task.status === "Todo"
+                ? "bg-gray-100 text-gray-600"
+                : task.status === "In Progress"
+                  ? "bg-yellow-100 text-yellow-700"
+                  : "bg-green-100 text-green-700"
+            }`}
+                    >
+                      {task.status}
+                    </p>
+                  )}
+                </div>
 
-                {/* PRIORITY */}
-                <select
-                  value={task.priority}
-                  onChange={(e) =>
-                    updateField(task._id, "priority", e.target.value)
-                  }
-                  className={`px-3 py-1 rounded-full text-xs font-medium border cursor-pointer outline-none
+                <div className="flex items-center gap-1">
+                  {/* PRIORITY */}
+                  <p className="text-sm text-gray-500">Priority: </p>
+                  {user.isAdmin ? (
+                    <select
+                      value={task.priority}
+                      onChange={(e) =>
+                        updateField(task._id, "priority", e.target.value)
+                      }
+                      className={`px-3 py-1 rounded-full text-xs font-medium border cursor-pointer outline-none
             ${
               task.priority === "Low"
                 ? "bg-green-100 text-green-700"
@@ -266,11 +287,26 @@ const ProjectDetails = () => {
                   ? "bg-yellow-100 text-yellow-700"
                   : "bg-red-100 text-red-700"
             }`}
-                >
-                  <option>Low</option>
-                  <option>Medium</option>
-                  <option>High</option>
-                </select>
+                    >
+                      <option>Low</option>
+                      <option>Medium</option>
+                      <option>High</option>
+                    </select>
+                  ) : (
+                    <p
+                      className={`px-3 py-1 rounded-full text-xs font-medium border cursor-pointer outline-none
+            ${
+              task.priority === "Low"
+                ? "bg-green-100 text-green-700"
+                : task.priority === "Medium"
+                  ? "bg-yellow-100 text-yellow-700"
+                  : "bg-red-100 text-red-700"
+            }`}
+                    >
+                      {task.status}
+                    </p>
+                  )}
+                </div>
               </div>
 
               <p className="text-sm text-gray-600 mt-3">
