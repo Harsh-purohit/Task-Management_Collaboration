@@ -1,22 +1,22 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrashCan } from "@fortawesome/free-regular-svg-icons";
-import { setAllusers, softDeleteUser } from "../../features/alluserSlice";
+import { softDeleteUser } from "../../features/alluserSlice";
 
 const AllUserInfo = () => {
   const dispatch = useDispatch();
   const users = useSelector((state) => state.allusers.allusers.users || []);
 
-  const [search, setSearch] = useState("");
+  // const [search, setSearch] = useState("");
   const url = import.meta.env.VITE_BACKEND_URL;
 
   // ================= Delete =================
   const handleDelete = async (id) => {
     try {
-      const response = await axios.patch(
+      await axios.patch(
         `${url}/api/admin/${id}/deleteuser`,
         {},
         { withCredentials: true },
@@ -31,10 +31,10 @@ const AllUserInfo = () => {
     }
   };
 
-  // ================= Filter =================
-  const filteredUsers = users.filter((u) =>
-    u.name.toLowerCase().includes(search.toLowerCase()),
-  );
+  // // ================= Filter =================
+  // const filteredUsers = users.filter((u) =>
+  //   u.name.toLowerCase().includes(search.toLowerCase()),
+  // );
 
   return (
     <div className="p-2 max-w-6xl mx-auto">

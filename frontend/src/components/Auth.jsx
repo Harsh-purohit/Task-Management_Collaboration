@@ -41,7 +41,12 @@ const Auth = () => {
       // console.log(data);
 
       if (data.token) {
-        const action = mode === "login" ? login(data) : register(data);
+        const payload = {
+          user: data.user_or_admin,
+          role: data.role,
+          token: data.token,
+        };
+        const action = mode === "login" ? login(payload) : register(payload);
 
         dispatch(action);
 

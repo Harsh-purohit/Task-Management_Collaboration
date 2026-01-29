@@ -54,7 +54,7 @@ const StatsCards = () => {
     return () => {
       dispatch(clearUserInfo());
     };
-  }, [dispatch, BACKEND_URL]);
+  }, []);
 
   const totalTasks = userInfo?.tasks?.length || 0;
   const completedTasks =

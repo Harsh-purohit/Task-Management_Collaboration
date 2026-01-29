@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  allusers: [],
+  allusers: JSON.parse(localStorage.getItem("allusers")) || [],
 };
 
 const userInfoSlice = createSlice({
@@ -9,14 +9,18 @@ const userInfoSlice = createSlice({
   initialState,
   reducers: {
     setAllusers: (state, action) => {
+      // console.log("from slice", action.payload);
+
       state.allusers = action.payload;
-      // console.log("from slice", state.allusers);
+      localStorage.setItem("allusers", JSON.stringify(state.allusers));
     },
 
     softDeleteUser: (state, action) => {
       state.allusers = state.allusers.filter(
         (user) => user._id !== action.payload,
       );
+
+      // console.log("soft delete user: ", state.allusers);
     },
   },
 });

@@ -15,7 +15,6 @@ import {
 } from "@fortawesome/free-regular-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import TaskModal from "../components/Tasks/TaskModal";
-import toast from "react-hot-toast";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { notify } from "../utils/toast";
@@ -132,7 +131,7 @@ const ProjectDetails = () => {
 
   useEffect(() => {
     // console.log(tasks.length);
-    if (tasks.length === 0 && !loading) {
+    if (tasks.length === 0) {
       notify.dismiss();
       notify.success("No tasks yet 🚀");
 

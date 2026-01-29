@@ -31,11 +31,12 @@ const Projects = () => {
   const getUserName = (id) => {
     // console.log(id);
     let user = users.users.find((u) => u._id === id);
+    
     if (!user) {
       user = users.admin.find((u) => u._id === id);
     }
 
-    // console.log("-------", user);
+    console.log("-------", user);
     return user ? user.name : "Unknown";
   };
 

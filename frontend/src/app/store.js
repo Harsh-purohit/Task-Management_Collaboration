@@ -1,6 +1,6 @@
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
-import storage from "redux-persist/lib/storage";
-import { persistReducer, persistStore } from "redux-persist";
+// import storage from "redux-persist/lib/storage";
+// import { persistReducer, persistStore } from "redux-persist";
 
 import authReducer from "../features/authSlice";
 import loginSlice from "../features/loginSlice";
@@ -9,27 +9,40 @@ import projectSlice from "../features/projectSlice";
 import allusers from "../features/alluserSlice";
 import tasksReducer from "../features/taskSlice";
 
-const rootReducer = combineReducers({
-  auth: authReducer,
-  login: loginSlice,
-  userInfo: userInfoSlice,
-  projects: projectSlice,
-  allusers: allusers,
-  tasks: tasksReducer,
+const store = configureStore({
+  reducer: {
+    auth: authReducer,
+    login: loginSlice,
+    userInfo: userInfoSlice,
+    projects: projectSlice,
+    allusers: allusers,
+    tasks: tasksReducer,
+  },
 });
 
-const persistConfig = {
-  key: "root",
-  storage,
-  whitelist: ["auth", "userInfo"], // ONLY persist auth (important!)
-};
+export default store;
 
-const persistedReducer = persistReducer(persistConfig, rootReducer);
+// const rootReducer = combineReducers({
+//   auth: authReducer,
+//   login: loginSlice,
+//   userInfo: userInfoSlice,
+//   projects: projectSlice,
+//   allusers: allusers,
+//   tasks: tasksReducer,
+// });
 
-export const store = configureStore({
-  reducer: persistedReducer,
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({ serializableCheck: false }),
-});
+// const persistConfig = {
+//   key: "root",
+//   storage,
+//   whitelist: ["auth", "userInfo"], // ONLY persist auth (important!)
+// };
 
-export const persistor = persistStore(store);
+// const persistedReducer = persistReducer(persistConfig, rootReducer);
+
+// export const store = configureStore({
+//   reducer: persistedReducer,
+//   middleware: (getDefaultMiddleware) =>
+//     getDefaultMiddleware({ serializableCheck: false }),
+// });
+
+// export const persistor = persistStore(store);
