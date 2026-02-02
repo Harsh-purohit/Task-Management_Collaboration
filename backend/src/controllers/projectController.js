@@ -1,8 +1,9 @@
 import Projects from "../models/Projects.js";
 import Tasks from "../models/Tasks.js";
+import { fetchUserProjects } from "../service/userProject.js";
 import { logActivity } from "../utils/logActivity.js";
 import mongoose from "mongoose";
-import client from "../config/redisClient.js";
+// import client from "../config/redisClient.js";
 
 const createProject = async (req, res) => {
   try {
@@ -45,53 +46,31 @@ const createProject = async (req, res) => {
 
 const getProject = async (req, res) => {
   try {
-    // const cacheKey = `projects:`;
-
-    // const cachedData = await client.get(cacheKey);
-    // // console.log(cachedData);
-    // if (cachedData) {
-    //   return res.status(200).json(JSON.parse(cachedData));
-    // }
-
-    if (req.role === "admin") {
-      const projects = await Projects.find({}).lean();
-
-      // await client.set(cacheKey, JSON.stringify(projects), { EX: 180 });
-      return res.status(200).json(projects);
-    }
-
-    // projects assigned to user by admin
-    const ownedProjects = await Projects.find({ userRef: req.userId }).lean();
-
-    // if a user is not assigned to project, then if (either he is assigned to task)
-    // tasks assigned to user by admin
-    // result = task -> projectID
-    const tasks_projectID = await Tasks.find({ assignedTo: req.userId })
-      .select("projectRef")
-      .lean();
-
-    // extract project ids
-    // const projectIds = tasks.map((t) => t.projectRef);
-
-    // projects where user has tasks -> means user assigned to task but not project
-    const taskProjects = await Projects.find({
-      _id: { $in: tasks_projectID },
-    }).lean();
-
-    // merge unique
-    const allProjects = [
-      ...ownedProjects,
-      ...taskProjects.filter(
-        (tp) => !ownedProjects.some((op) => op._id.equals(tp._id)),
-      ),
-    ];
+    const projects = await fetchUserProjects(req);
 
     // await client.set(cacheKey, JSON.stringify(allProjects), { EX: 180 });
 
-    return res.status(200).json(allProjects);
+    return res.status(200).json(projects);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+const filterProject = async (req, res) => {
+  try {
+    const { status } = req.query;
+    const project = await fetchUserProjects(req);
+
+    let filter = project;
+
+    if (status && status !== "All") {
+      filter = project.filter((p) => p.status === status);
+    }
+
+    res.status(200).json(filter);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -208,4 +187,10 @@ const deleteProject = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-export { createProject, getProject, updateProject, deleteProject };
+export {
+  createProject,
+  getProject,
+  filterProject,
+  updateProject,
+  deleteProject,
+};

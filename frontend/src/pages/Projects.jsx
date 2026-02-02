@@ -6,9 +6,11 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenToSquare, faTrashCan } from "@fortawesome/free-regular-svg-icons";
+import { faFilter } from "@fortawesome/free-solid-svg-icons";
 import { faClockRotateLeft } from "@fortawesome/free-solid-svg-icons";
 import ActivityTimeline from "../components/ActivityTimeline";
 import { notify } from "../utils/toast";
+import ProjectFilter from "../components/Projects/ProjectFIlter";
 
 const Projects = () => {
   const dispatch = useDispatch();
@@ -17,6 +19,8 @@ const Projects = () => {
 
   const user = useSelector((state) => state.auth);
   const userId = useSelector((state) => state.auth.user?._id);
+
+  const [status, setStatus] = useState("");
 
   // console.log("-----", user);
 
@@ -29,31 +33,35 @@ const Projects = () => {
 
   const url = import.meta.env.VITE_BACKEND_URL;
 
-  useEffect(() => {
-    const fetchProjects = async () => {
-      // dispatch(startLoading());
-
-      const { data } = await axios.get(`${url}/api/projects`, {
+  // filter project
+  const filterProjects = async (status = "All") => {
+    try {
+      const { data } = await axios.get(`${url}/api/projects/filter`, {
         withCredentials: true,
-        params: { users: userId },
+        params: { status },
       });
 
       // console.log(data);
+
       dispatch(setProjects(data));
 
       if (data?.length === 0) {
         notify.dismiss();
-        notify.success("No Projects yet 🚀");
+        notify.success(`No Projects yet in "${status}" status`);
 
-        const timer = setTimeout(() => navigate("/"), 1000);
+        const timer = setTimeout(() => navigate("/dashboard"), 1000);
 
         return () => {
           clearTimeout(timer);
         };
       }
-    };
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-    fetchProjects();
+  useEffect(() => {
+    filterProjects();
   }, []);
 
   const getUserName = (id) => {
@@ -124,6 +132,10 @@ const Projects = () => {
             + Create Project
           </button>
         )}
+      </div>
+
+      <div className="relative z-50">
+        <ProjectFilter filterProjects={filterProjects} />
       </div>
 
       {projects.length === 0 ? (

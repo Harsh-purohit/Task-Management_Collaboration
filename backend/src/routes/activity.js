@@ -1,7 +1,7 @@
 import express, { json } from "express";
 import { bothAuth } from "../middleware/checkAuth.js";
 import ActivityLog from "../models/ActivityLog.js";
-import client from "../config/redisClient.js";
+// import client from "../config/redisClient.js";
 
 const router = express.Router();
 

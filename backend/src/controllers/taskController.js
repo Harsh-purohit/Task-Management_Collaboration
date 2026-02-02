@@ -3,6 +3,7 @@ import Tasks from "../models/Tasks.js";
 import sendEmail from "../utils/sendEmail.js";
 import User from "../models/User.js";
 import { logActivity } from "../utils/logActivity.js";
+import { fetchUserTasks } from "../service/userTask.js";
 
 const createTask = async (req, res) => {
   try {
@@ -79,7 +80,7 @@ const createTask = async (req, res) => {
 
 const getTask = async (req, res) => {
   try {
-    const { id, users, status, priority } = req.query;
+    const { id, users } = req.query;
     const filter = {};
 
     // all task
@@ -104,14 +105,6 @@ const getTask = async (req, res) => {
       };
     }
 
-    if (status) {
-      filter.status = status;
-    }
-
-    if (priority) {
-      filter.priority = priority;
-    }
-
     const tasks = await Tasks.find(filter).lean();
 
     // await client.set(cacheKey, JSON.stringify(tasks), { EX: 180 });
@@ -121,6 +114,26 @@ const getTask = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+const filterTask = async (req, res) => {
+  try {
+    const { status, priority } = req.query;
+
+    let tasks = await fetchUserTasks(req);
+
+    if (status && status !== "All") {
+      tasks = tasks.filter((t) => t.status === status);
+    }
+
+    if (priority && priority !== "All") {
+      tasks = tasks.filter((t) => t.priority === priority);
+    }
+    // console.log(tasks);
+    res.status(200).json(tasks);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -345,4 +358,4 @@ const deleteTask = async (req, res) => {
   }
 };
 
-export { createTask, getTask, updateTask, postComment, deleteTask };
+export { createTask, getTask, filterTask, updateTask, postComment, deleteTask };

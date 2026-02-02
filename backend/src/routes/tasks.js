@@ -5,10 +5,12 @@ import Tasks from "../models/Tasks.js";
 import {
   createTask,
   deleteTask,
+  filterTask,
   getTask,
   postComment,
   updateTask,
 } from "../controllers/taskController.js";
+import { fetchUserTasks } from "../service/userTask.js";
 
 const router = express.Router();
 
@@ -20,54 +22,12 @@ router.get("/", bothAuth, getTask);
 router.put("/:id", adminAuth, updateTask);
 router.delete("/:id", adminAuth, deleteTask);
 
+router.get("/:id/filter", bothAuth, filterTask);
+
 // tasks specific to project
 router.get("/:id", bothAuth, async (req, res) => {
   try {
-    const { users, status, priority } = req.query;
-    const { id } = req.params;
-
-    const projectId = new mongoose.Types.ObjectId(id);
-
-    let filter = {
-      projectRef: projectId,
-    };
-
-    // =========================
-    // USER LOGIC
-    // =========================
-    if (req.role === "user") {
-      // first try: tasks assigned to user
-      filter.assignedTo = new mongoose.Types.ObjectId(req.userId);
-
-      if (status) filter.status = status;
-      if (priority) filter.priority = priority;
-
-      let tasks = await Tasks.find(filter).lean();
-
-      // 👇 fallback: if empty, show all project tasks
-      if (tasks.length === 0) {
-        delete filter.assignedTo;
-        tasks = await Tasks.find(filter).lean();
-      }
-
-      return res.status(200).json(tasks);
-    }
-
-    // =========================
-    // ADMIN LOGIC (unchanged)
-    // =========================
-    if (users) {
-      const userArray = Array.isArray(users) ? users : [users];
-
-      filter.assignedTo = {
-        $in: userArray.map((uid) => new mongoose.Types.ObjectId(uid)),
-      };
-    }
-
-    if (status) filter.status = status;
-    if (priority) filter.priority = priority;
-
-    const tasks = await Tasks.find(filter).lean();
+    const tasks = await fetchUserTasks(req);
 
     res.status(200).json(tasks);
   } catch (err) {

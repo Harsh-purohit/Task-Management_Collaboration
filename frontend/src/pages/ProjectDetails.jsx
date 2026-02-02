@@ -18,6 +18,7 @@ import TaskModal from "../components/Tasks/TaskModal";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { notify } from "../utils/toast";
+import TaskFilter from "../components/Tasks/TaskFilter";
 
 dayjs.extend(relativeTime);
 
@@ -45,6 +46,19 @@ const ProjectDetails = () => {
 
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
+  const redirect = (data) => {
+    if (data?.length === 0) {
+      notify.dismiss();
+      notify.success("No tasks yet 🚀");
+
+      const timer = setTimeout(() => navigate("/projects"), 1000);
+
+      return () => {
+        clearTimeout(timer);
+      };
+    }
+  };
+
   // -----------------------------
   // Fetch
   // -----------------------------
@@ -58,20 +72,34 @@ const ProjectDetails = () => {
 
       // console.log(data);
       dispatch(setTasks(data));
-      
-      if (data?.length === 0) {
-        notify.dismiss();
-        notify.success("No tasks yet 🚀");
-
-        const timer = setTimeout(() => navigate("/projects"), 1000);
-
-        return () => {
-          clearTimeout(timer);
-        };
-      }
+      redirect(data);
     };
 
     fetchTasks();
+  }, []);
+
+  const filterTask = async (status, priority) => {
+    try {
+      const { data } = await axios.get(
+        `${BACKEND_URL}/api/tasks/${id}/filter`,
+        {
+          withCredentials: true,
+          params: { status, priority },
+        },
+      );
+
+      // console.log(data);
+
+      dispatch(setTasks(data));
+
+      redirect(data);
+    } catch (error) {
+      notify.error(error);
+    }
+  };
+
+  useEffect(() => {
+    filterTask();
   }, []);
 
   // console.log("users:   ", users);
@@ -157,6 +185,9 @@ const ProjectDetails = () => {
             + Add Task
           </button>
         )}
+      </div>
+      <div className="relative z-50">
+        <TaskFilter filterTasks={filterTask} />
       </div>
       {tasks.length === 0 ? (
         <div className="text-gray-500 text-center py-20">No tasks yet 🚀</div>
