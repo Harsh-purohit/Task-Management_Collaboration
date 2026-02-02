@@ -4,6 +4,7 @@ import sendEmail from "../utils/sendEmail.js";
 import User from "../models/User.js";
 import { logActivity } from "../utils/logActivity.js";
 import { fetchUserTasks } from "../service/userTask.js";
+import { getIO } from "../socket.js";
 
 const createTask = async (req, res) => {
   try {
@@ -64,6 +65,9 @@ const createTask = async (req, res) => {
             `,
       });
     });
+
+    const io = getIO();
+    io.emit("taskCreated", { newTask });
 
     // await client(`tasks:${req.userId}`);
     // await client.set(`${req.userId}_tasks: ${id}`);
@@ -253,6 +257,9 @@ const updateTask = async (req, res) => {
       });
     }
 
+    const io = getIO();
+    io.emit("taskUpdated", { updatedTask });
+
     // await client.del(`tasks:${req.userId}`);
     // await client.del(`${req.userId}_tasks: ${id}`);
 
@@ -347,6 +354,9 @@ const deleteTask = async (req, res) => {
         project: task.projectRef?._id,
       },
     });
+
+    const io = getIO();
+    io.emit("taskDeleted", { id });
 
     // await client.del(`tasks:${req.userId}`);
     // await client.del(`${req.userId}_tasks: ${id}`);

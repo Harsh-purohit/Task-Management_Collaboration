@@ -1,16 +1,21 @@
 import { useSelector, useDispatch } from "react-redux";
 import { useState, useEffect } from "react";
-import { removeProject, setProjects } from "../features/projectSlice";
+import {
+  removeProject,
+  setProjects,
+  addProject,
+  updateProject,
+} from "../features/projectSlice";
 import ProjectModal from "../components/Projects/ProjectModal";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenToSquare, faTrashCan } from "@fortawesome/free-regular-svg-icons";
-import { faFilter } from "@fortawesome/free-solid-svg-icons";
 import { faClockRotateLeft } from "@fortawesome/free-solid-svg-icons";
 import ActivityTimeline from "../components/ActivityTimeline";
 import { notify } from "../utils/toast";
 import ProjectFilter from "../components/Projects/ProjectFIlter";
+import socket from "../socket";
 
 const Projects = () => {
   const dispatch = useDispatch();
@@ -20,7 +25,7 @@ const Projects = () => {
   const user = useSelector((state) => state.auth);
   const userId = useSelector((state) => state.auth.user?._id);
 
-  const [status, setStatus] = useState("");
+  // const [status, setStatus] = useState("");
 
   // console.log("-----", user);
 
@@ -32,6 +37,24 @@ const Projects = () => {
   const users = useSelector((state) => state.allusers.allusers || []);
 
   const url = import.meta.env.VITE_BACKEND_URL;
+
+  useEffect(() => {
+    socket.on("projectCreated", ({ projects }) => {
+      // console.log(projects);
+      dispatch(addProject(projects));
+    });
+
+    return () => socket.off("projectCreated");
+  }, [dispatch]);
+
+  useEffect(() => {
+    socket.on("projectUpdated", ({ projects }) => {
+      // console.log(projects);
+      dispatch(updateProject(projects));
+    });
+
+    return () => socket.off("projectCreated");
+  }, [dispatch]);
 
   // filter project
   const filterProjects = async (status = "All") => {

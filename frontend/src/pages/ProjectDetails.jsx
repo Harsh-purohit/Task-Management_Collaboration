@@ -7,6 +7,8 @@ import {
   removeTask,
   // clearTasks,
   startLoading,
+  addTask,
+  updateTask,
 } from "../features/taskSlice";
 import {
   faComment,
@@ -19,6 +21,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { notify } from "../utils/toast";
 import TaskFilter from "../components/Tasks/TaskFilter";
+import socket from "../socket";
 
 dayjs.extend(relativeTime);
 
@@ -35,6 +38,7 @@ const ProjectDetails = () => {
   // console.log("task: ", loading);
 
   const user = useSelector((state) => state.auth);
+  // console.log(user);
 
   const [openComments, setOpenComments] = useState(null);
   const [newComment, setNewComment] = useState("");
@@ -45,6 +49,31 @@ const ProjectDetails = () => {
   const [selectedTask, setSelectedTask] = useState("");
 
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
+  // socket
+  useEffect(() => {
+    socket.on("taskCreated", ({ newTask }) => {
+      dispatch(addTask(newTask));
+    });
+
+    return () => socket.off("taskCreated");
+  }, []);
+
+  useEffect(() => {
+    socket.on("taskUpdated", ({ updatedTask }) => {
+      dispatch(updateTask(updatedTask));
+    });
+
+    return () => socket.off("taskUpdated");
+  }, []);
+
+  useEffect(() => {
+    socket.on("taskDeleted", ({ id }) => {
+      dispatch(removeTask(id));
+    });
+
+    return () => socket.off("taskDeleted");
+  }, []);
 
   const redirect = (data) => {
     if (data?.length === 0) {
@@ -72,7 +101,7 @@ const ProjectDetails = () => {
 
       // console.log(data);
       dispatch(setTasks(data));
-      redirect(data);
+      !user.isAdmin && redirect(data);
     };
 
     fetchTasks();
@@ -92,7 +121,7 @@ const ProjectDetails = () => {
 
       dispatch(setTasks(data));
 
-      redirect(data);
+      !user.isAdmin && redirect(data);
     } catch (error) {
       notify.error(error);
     }
@@ -124,7 +153,7 @@ const ProjectDetails = () => {
       withCredentials: true,
     });
 
-    dispatch(removeTask(taskId));
+    // dispatch(removeTask(taskId));
     notify.success("Task Deleted!!");
   };
 

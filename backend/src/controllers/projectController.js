@@ -1,6 +1,7 @@
 import Projects from "../models/Projects.js";
 import Tasks from "../models/Tasks.js";
 import { fetchUserProjects } from "../service/userProject.js";
+import { getIO } from "../socket.js";
 import { logActivity } from "../utils/logActivity.js";
 import mongoose from "mongoose";
 // import client from "../config/redisClient.js";
@@ -24,16 +25,19 @@ const createProject = async (req, res) => {
       userRef,
       adminRef,
     });
-    await projects.save();
 
     await logActivity({
-      userId: req.userId,
-      role: req.role,
+      actorId: req.userId,
+      actorModel: req.role,
       action: "created",
       entity: "project",
       entityId: projects._id,
       message: `Created project "${projects.name}"`,
     });
+
+    // console.log(projects);
+    const io = getIO();
+    io.emit("projectCreated", { projects });
 
     // await client.RPUSH(`projects:`, JSON.stringify(projects));
 
@@ -138,6 +142,9 @@ const updateProject = async (req, res) => {
         metadata,
       });
     }
+
+    const io = getIO();
+    io.emit("projectUpdated", { projects });
 
     res.status(200).json(projects);
   } catch (err) {

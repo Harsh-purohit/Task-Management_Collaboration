@@ -46,7 +46,7 @@ const TaskModal = ({ projectId, task, onClose }) => {
         { withCredentials: true },
       );
 
-      dispatch(updateTask(data));
+      // dispatch(updateTask(data));
       notify.success("Task updated");
       onClose();
     } catch (err) {
@@ -63,7 +63,7 @@ const TaskModal = ({ projectId, task, onClose }) => {
         { withCredentials: true },
       );
 
-      dispatch(addTask(data));
+      // dispatch(addTask(data));
       notify.success("Task created");
       onClose();
     } catch (error) {

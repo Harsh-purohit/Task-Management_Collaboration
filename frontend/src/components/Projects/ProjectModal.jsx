@@ -74,7 +74,9 @@ const ProjectModal = ({ onClose, project }) => {
           withCredentials: true,
         });
 
+        console.log(response);
         dispatch(addProject(response.data));
+
         notify.success("New Project Added...");
       }
       // console.log(response.data);
