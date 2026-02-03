@@ -16,6 +16,7 @@ import ActivityTimeline from "../components/ActivityTimeline";
 import { notify } from "../utils/toast";
 import ProjectFilter from "../components/Projects/ProjectFIlter";
 import socket from "../socket";
+import { useSocketEvents } from "../hooks/SocketEvents";
 
 const Projects = () => {
   const dispatch = useDispatch();
@@ -38,23 +39,11 @@ const Projects = () => {
 
   const url = import.meta.env.VITE_BACKEND_URL;
 
-  useEffect(() => {
-    socket.on("projectCreated", ({ projects }) => {
-      // console.log(projects);
-      dispatch(addProject(projects));
-    });
-
-    return () => socket.off("projectCreated");
-  }, [dispatch]);
-
-  useEffect(() => {
-    socket.on("projectUpdated", ({ projects }) => {
-      // console.log(projects);
-      dispatch(updateProject(projects));
-    });
-
-    return () => socket.off("projectCreated");
-  }, [dispatch]);
+  useSocketEvents(socket, {
+    projectCreated: ({ projects }) => dispatch(addProject(projects)),
+    projectUpdated: ({ projects }) => dispatch(updateProject(projects)),
+    projectDeleted: ({ id }) => dispatch(removeProject(id)),
+  });
 
   // filter project
   const filterProjects = async (status = "All") => {

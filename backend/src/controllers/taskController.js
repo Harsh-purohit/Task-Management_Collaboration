@@ -33,8 +33,8 @@ const createTask = async (req, res) => {
     });
 
     await logActivity({
-      userId: req.userId,
-      role: req.role,
+      actorId: req.userId,
+      actorModel: req.role,
       action: "created",
       entity: "task",
       entityId: newTask._id,
@@ -283,37 +283,44 @@ const postComment = async (req, res) => {
       return res.status(400).json({ message: "Comment is required" });
     }
 
-    const taskComment = await Tasks.findById(id).select("comments").lean();
-    if (!taskComment) {
-      return res.status(404).json({ message: "Task not found" });
-    }
-
-    // 🔥 detect who is logged in (from bothAuth)
-    const commenterModel = req.role === "admin" ? "Admin" : "User";
-
-    taskComment.push({
+    const newComment = {
       userRef: req.userId,
+      userType: req.role === "admin" ? "Admin" : "User",
       comment,
+      commentedAt: new Date(),
+    };
+
+    // console.log(newComment);
+
+    await Tasks.findByIdAndUpdate(id, {
+      $push: { comments: { $each: [newComment], $position: 0 } },
     });
 
-    await taskComment.save();
-
-    // await task.populate("comments.commenter");
-
-    // repopulate before sending
-    const populated = await Tasks.findById(id)
-      .populate("createdBy", "name email")
-      .populate("assignedTo", "name email")
-      .populate("comments.userRef", "name email")
+    const task = await Tasks.findById(id)
+      .populate({
+        path: "comments.userRef",
+        select: "name email",
+      })
       .lean();
-    // console.log(task);
+
+    const populatedComment = task.comments.at(-1);
+
+    // console.log(typeof populatedComment.userRef);
+    // console.log(populatedComment);
+
+    const io = getIO();
+    io.emit("commentCreated", {
+      taskId: id,
+      commentInfo: populatedComment,
+      comment: populatedComment.comment,
+    });
 
     // await client.del(`tasks:${req.userId}`);
     // await client.del(`${req.userId}_tasks: ${id}`);
 
     res.status(201).json({
       message: "Comment added successfully",
-      task: populated,
+      task: populatedComment,
     });
   } catch (error) {
     console.error(error);

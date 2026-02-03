@@ -7,8 +7,14 @@ const commentSchema = new mongoose.Schema({
   },
   userRef: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User", // or Admin if you have separate model
+    refPath: "userType",
     required: true,
+  },
+  userType: {
+    type: String,
+    required: true,
+    enum: ["User", "Admin"],
+    default: "User",
   },
   commentedAt: {
     type: Date,

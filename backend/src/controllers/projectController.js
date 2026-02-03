@@ -186,6 +186,9 @@ const deleteProject = async (req, res) => {
       },
     });
 
+    const io = getIO();
+    io.emit("projectDeleted", { id });
+
     // await client.del(`projects:`, JSON.stringify(projects));
 
     res.status(200).json({ message: "Project deleted successfully" });

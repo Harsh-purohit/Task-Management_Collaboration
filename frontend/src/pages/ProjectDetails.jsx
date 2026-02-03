@@ -6,7 +6,7 @@ import {
   setTasks,
   removeTask,
   // clearTasks,
-  startLoading,
+  addCommentToTask,
   addTask,
   updateTask,
 } from "../features/taskSlice";
@@ -22,6 +22,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { notify } from "../utils/toast";
 import TaskFilter from "../components/Tasks/TaskFilter";
 import socket from "../socket";
+import { useSocketEvents } from "../hooks/SocketEvents";
 
 dayjs.extend(relativeTime);
 
@@ -35,7 +36,7 @@ const ProjectDetails = () => {
   const tasks = useSelector((state) => state.tasks.tasks);
   const loading = useSelector((state) => state.tasks.loading);
 
-  // console.log("task: ", loading);
+  console.log("task: ", tasks);
 
   const user = useSelector((state) => state.auth);
   // console.log(user);
@@ -51,29 +52,14 @@ const ProjectDetails = () => {
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
   // socket
-  useEffect(() => {
-    socket.on("taskCreated", ({ newTask }) => {
-      dispatch(addTask(newTask));
-    });
-
-    return () => socket.off("taskCreated");
-  }, []);
-
-  useEffect(() => {
-    socket.on("taskUpdated", ({ updatedTask }) => {
-      dispatch(updateTask(updatedTask));
-    });
-
-    return () => socket.off("taskUpdated");
-  }, []);
-
-  useEffect(() => {
-    socket.on("taskDeleted", ({ id }) => {
-      dispatch(removeTask(id));
-    });
-
-    return () => socket.off("taskDeleted");
-  }, []);
+  useSocketEvents(socket, {
+    taskCreated: ({ newTask }) => dispatch(addTask(newTask)),
+    taskUpdated: ({ updatedTask }) => dispatch(updateTask(updatedTask)),
+    taskDeleted: ({ id }) => dispatch(removeTask(id)),
+    commentCreated: ({ taskId, commentInfo, comment }) =>
+      // (console.log("from details: ", taskId, comment),
+      dispatch(addCommentToTask({ taskId, commentInfo, comment })),
+  });
 
   const redirect = (data) => {
     if (data?.length === 0) {
@@ -190,7 +176,12 @@ const ProjectDetails = () => {
         { withCredentials: true },
       );
 
-      dispatch(setTasks(tasks.map((t) => (t._id === taskId ? data.task : t))));
+      // dispatch(
+      //   addCommentToTask({
+      //     taskId,
+      //     comment: data.comment,
+      //   }),
+      // );
 
       setNewComment("");
       notify.success("Comment added");
@@ -363,7 +354,7 @@ const ProjectDetails = () => {
                   : "bg-red-100 text-red-700"
             }`}
                     >
-                      {task.status}
+                      {task.priority}
                     </p>
                   )}
                 </div>
@@ -398,7 +389,12 @@ const ProjectDetails = () => {
               {openComments === task._id && (
                 <div className="mt-4 border-t pt-3 space-y-3">
                   <div className="max-h-32 overflow-y-auto space-y-2">
-                    {task.comments.map((c, i) => (
+                    {[...task.comments]
+                      .sort(
+                        (a, b) =>
+                          new Date(b.commentedAt) - new Date(a.commentedAt),
+                      )
+                      .map((c, i) => (
                       <div
                         key={i}
                         className="bg-gray-50 p-3 rounded-lg text-xs"

@@ -19,12 +19,22 @@ export const fetchUserTasks = async (req) => {
     // first try: tasks assigned to user
     filter.assignedTo = new mongoose.Types.ObjectId(req.userId);
 
-    let tasks = await Tasks.find(filter).lean();
+    let tasks = await Tasks.find(filter)
+      .populate({
+        path: "comments.userRef",
+        select: "name email",
+      })
+      .lean();
 
     // 👇 fallback: if empty, show all project tasks
     if (tasks.length === 0) {
       delete filter.assignedTo;
-      tasks = await Tasks.find(filter).lean();
+      tasks = await Tasks.find(filter)
+        .populate({
+          path: "comments.userRef",
+          select: "name email",
+        })
+        .lean();
     }
 
     return tasks;
@@ -41,7 +51,12 @@ export const fetchUserTasks = async (req) => {
     };
   }
 
-  const tasks = await Tasks.find(filter).lean();
+  const tasks = await Tasks.find(filter)
+    .populate({
+      path: "comments.userRef",
+      select: "name email",
+    })
+    .lean();
 
   return tasks;
 };

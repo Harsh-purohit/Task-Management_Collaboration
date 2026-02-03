@@ -37,6 +37,16 @@ const tasksSlice = createSlice({
       console.log("comments: ", action.payload);
     },
 
+    addCommentToTask: (state, action) => {
+      const { taskId, commentInfo, comment } = action.payload;
+
+      const task = state.tasks.find((t) => t._id === taskId);
+      if (task) {
+        task.comments.unshift(commentInfo); // keep latest-first
+      }
+      // console.log("from slice: ", action.payload);
+    },
+
     removeTask: (state, action) => {
       state.tasks = state.tasks.filter((t) => t._id !== action.payload);
     },
@@ -54,6 +64,7 @@ export const {
   updateTask,
   removeTask,
   setComment,
+  addCommentToTask,
   // clearTasks,
 } = tasksSlice.actions;
 
