@@ -14,14 +14,12 @@ const register = async (req, res) => {
 
     const hashPwd = await bcrypt.hash(password, 10);
 
-    let adminRef = null;
-    if (role == "admin") {
+    if (role === "admin") {
       const admin = await Admin.create({
         name,
         email,
         password: hashPwd,
       });
-      adminRef = admin._id;
       await admin.save();
 
       const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, {
@@ -63,7 +61,7 @@ const register = async (req, res) => {
         `,
       });
 
-      res.json({
+      return res.json({
         token,
         admin,
         role,
@@ -124,14 +122,14 @@ const register = async (req, res) => {
         `,
     });
 
-    res.json({
+    return res.json({
       token,
       user,
       role,
     });
   } catch (err) {
     console.log(err);
-    return res.status(500).json({ message: err });
+    return res.status(500).json({ message: err?.message || "Server error" });
   }
 };
 
@@ -171,7 +169,7 @@ const login = async (req, res) => {
       maxAge: 10 * 24 * 60 * 60 * 1000,
     });
 
-    res.json({
+    return res.json({
       token,
       user_or_admin,
       role,

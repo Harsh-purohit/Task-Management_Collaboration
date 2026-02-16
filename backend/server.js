@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import fs from "fs";
 import connectDB from "./src/config/db.js";
 import authRoutes from "./src/routes/auth.js";
 import allusersRoutes from "./src/routes/admin.js";
@@ -28,9 +29,12 @@ app.use("/api/tasks", taskRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/activity", activityLogs);
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8000;
+const isDocker = fs.existsSync("/.dockerenv");
+const mongoUri =
+  (isDocker && process.env.MONGO_URI_DOCKER) || process.env.MONGO_URI;
 
-connectDB(process.env.MONGO_URI)
+connectDB(mongoUri)
   .then(() => {
     server.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);

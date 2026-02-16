@@ -1,9 +1,9 @@
 import { io } from "socket.io-client";
 
-const socket_url = import.meta.env.VITE_SOCKET_URL;
+const socketUrl = import.meta.env.VITE_SOCKET_URL;
 
-const socket = io(socket_url, {
-  transports: ["websocket"],
+const socket = io(socketUrl, {
+  withCredentials: true,
   autoConnect: true,
 });
 

@@ -61,7 +61,7 @@ const Auth = () => {
         setTimeout(() => navigate("/dashboard"), 500);
       }
     } catch (error) {
-      notify.error(error.response.data.message || "Something went wrong!");
+      notify.error(error?.response?.data?.message || "Network error: backend is not responding");
       console.error("Error during authentication:", error);
     }
   };
