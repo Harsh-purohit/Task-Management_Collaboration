@@ -3,17 +3,20 @@ import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import Admin from "../models/Admin.js";
 import sendEmail from "../utils/sendEmail.js";
+import { authLoginsTotal, authRegistersTotal } from "../metrics/index.js";
 
 const register = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
 
     if (!email || !password) {
+      authRegistersTotal.inc({ role: role || "unknown", status: "error" });
       return res.status(400).json({ message: "Email and Password required.." });
     }
 
     const hashPwd = await bcrypt.hash(password, 10);
 
+    // Admin registration is stored in Admin collection.
     if (role === "admin") {
       const admin = await Admin.create({
         name,
@@ -61,6 +64,8 @@ const register = async (req, res) => {
         `,
       });
 
+      // Successful register metric for admin path.
+      authRegistersTotal.inc({ role: "admin", status: "success" });
       return res.json({
         token,
         admin,
@@ -68,6 +73,7 @@ const register = async (req, res) => {
       });
     }
 
+    // Default register path stores account in User collection.
     const user = await User.create({
       name,
       email,
@@ -122,6 +128,8 @@ const register = async (req, res) => {
         `,
     });
 
+    // Successful register metric for user path.
+    authRegistersTotal.inc({ role: role || "user", status: "success" });
     return res.json({
       token,
       user,
@@ -129,6 +137,11 @@ const register = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
+    // Catch-all register failure metric.
+    authRegistersTotal.inc({
+      role: req?.body?.role || "unknown",
+      status: "error",
+    });
     return res.status(500).json({ message: err?.message || "Server error" });
   }
 };
@@ -138,9 +151,12 @@ const login = async (req, res) => {
     const { email, password } = req.body;
     // console.log(req.body);
 
-    if (!email || !password)
+    if (!email || !password) {
+      authLoginsTotal.inc({ role: "unknown", status: "error" });
       return res.status(400).json({ message: "email & password required" });
+    }
 
+    // Check user collection first; fallback to admin collection.
     let role;
     let user_or_admin = await User.findOne({ email, isDeleted: false }).lean();
     if (user_or_admin) role = "user";
@@ -152,11 +168,16 @@ const login = async (req, res) => {
     // console.log(user_or_admin);
     // console.log(role);
 
-    if (!user_or_admin)
+    if (!user_or_admin) {
+      authLoginsTotal.inc({ role: "unknown", status: "error" });
       return res.status(400).json({ message: "Invalid credentials" });
+    }
 
     const ok = await bcrypt.compare(password, user_or_admin.password);
-    if (!ok) return res.status(400).json({ message: "Invalid credentials" });
+    if (!ok) {
+      authLoginsTotal.inc({ role: role || "unknown", status: "error" });
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
 
     const token = jwt.sign({ id: user_or_admin._id }, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRES_IN || "10d",
@@ -169,14 +190,17 @@ const login = async (req, res) => {
       maxAge: 10 * 24 * 60 * 60 * 1000,
     });
 
+    // Successful login metric with resolved role.
+    authLoginsTotal.inc({ role: role || "unknown", status: "success" });
     return res.json({
       token,
       user_or_admin,
       role,
     });
   } catch (err) {
-    // console.error(err);
-    res.status(500).json({ message: "Server error" });
+    // Catch-all login failure metric.
+    authLoginsTotal.inc({ role: "unknown", status: "error" });
+    return res.status(500).json({ message: "Server error" });
   }
 };
 
